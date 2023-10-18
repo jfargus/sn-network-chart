@@ -7,11 +7,11 @@ function isTextCellNotEmpty(c) {
   return (c.qText && !(c.qIsNull || c.qText.trim() == ''));
 }
 
-function getColor (index, colors) {
+function getColor(index, colors) {
   return colors[index % colors.length];
 }
 
-export default function paint ( { element,layout, theme, selections, constraints } ) {
+export default function paint({ element, layout, theme, selections, constraints }) {
   return new Promise((resolve) => {
     const colorScale = theme.getDataColorPalettes()[0];
     const numDimensions = layout.qHyperCube.qDimensionInfo.length;
@@ -21,7 +21,7 @@ export default function paint ( { element,layout, theme, selections, constraints
       id = layout.qInfo.qId,
       containerId = 'network-container_' + id;
 
-    if(qData && qData.qMatrix) {
+    if (qData && qData.qMatrix) {
       element.textContent = '';
       const topDiv = document.createElement("div");
       topDiv.setAttribute('id', containerId);
@@ -29,7 +29,7 @@ export default function paint ( { element,layout, theme, selections, constraints
       constraints.passive && topDiv.classList.add('is-edit-mode');
       element.append(topDiv);
 
-      var dataSet = qData.qMatrix.map(function(e){
+      var dataSet = qData.qMatrix.map(function (e) {
         const nodeName = e[1].qText;
         let groupNumber;
 
@@ -37,10 +37,10 @@ export default function paint ( { element,layout, theme, selections, constraints
           id: e[0].qText,
           eNum: e[0].qElemNumber,
           label: nodeName,
-          parentid : e[2].qText
+          parentid: e[2].qText
         };
 
-        if(numDimensions === 4) {
+        if (numDimensions === 4) {
           groupNumber = e[3].qText;
           dataItem.group = groupNumber;
         }
@@ -52,9 +52,9 @@ export default function paint ( { element,layout, theme, selections, constraints
           if (isTextCellNotEmpty(tooltip)) {
             const tooltipText = tooltip.qText;
             dataItem.title = escapeHTML(tooltipText);
-          } else if(numMeasures > 1) {
+          } else if (numMeasures > 1) {
             // This part is a bit fishy and should be tested
-            const nodeMeasure = e[numDimensions+1].qText;
+            const nodeMeasure = e[numDimensions + 1].qText;
             dataItem.title = createTooltipHTML({
               name: nodeName,
               groupNumber,
@@ -64,16 +64,16 @@ export default function paint ( { element,layout, theme, selections, constraints
         }
 
         if (numMeasures > 1) {
-          if (e[numDimensions+1].qNum) {
+          if (e[numDimensions + 1].qNum) {
             // node value - to scale node shape size
-            dataItem.nodeValue = e[numDimensions+1].qNum;
+            dataItem.nodeValue = e[numDimensions + 1].qNum;
           }
         }
 
         if (numMeasures > 2) {
-          if (e[numDimensions+2].qNum) {
+          if (e[numDimensions + 2].qNum) {
             // edge value - to scale edge width
-            dataItem.edgeValue = e[numDimensions+2].qNum;
+            dataItem.edgeValue = e[numDimensions + 2].qNum;
           }
         }
 
@@ -86,24 +86,24 @@ export default function paint ( { element,layout, theme, selections, constraints
       var edges = [];
       const groups = {};
 
-      for(let i = 0; i< dataSet.length; i++){
+      for (let i = 0; i < dataSet.length; i++) {
         if (layout.displayEdgeLabel && dataSet[i].edgeValue !== undefined) {
           edges.push({
-            "from":dataSet[i].id,
-            "to":dataSet[i].parentid,
-            "value":dataSet[i].edgeValue,
+            "from": dataSet[i].id,
+            "to": dataSet[i].parentid,
+            "value": dataSet[i].edgeValue,
             "label": `${dataSet[i].edgeValue}`
           }); // with labels
         } else {
           edges.push({
-            "from":dataSet[i].id,
-            "to":dataSet[i].parentid,
-            "value":dataSet[i].edgeValue
+            "from": dataSet[i].id,
+            "to": dataSet[i].parentid,
+            "value": dataSet[i].edgeValue
           }); // create edges
         }
 
         // process uniqueness
-        if(uniqueId.indexOf(dataSet[i].id) === -1) {
+        if (uniqueId.indexOf(dataSet[i].id) === -1) {
           uniqueId.push(dataSet[i].id);
 
           var nodeItem = {
@@ -118,9 +118,9 @@ export default function paint ( { element,layout, theme, selections, constraints
           groups[nodeItem.group] = {};
         }
       }
-      const colors = colorScale.colors[Math.min(Object.keys(groups).length-1, colorScale.colors.length-1)];
+      const colors = colorScale.colors[Math.min(Object.keys(groups).length - 1, colorScale.colors.length - 1)];
 
-      Object.keys(groups).forEach(function(g,i) {
+      Object.keys(groups).forEach(function (g, i) {
         groups[g].color = getColor(i, colors);
       });
 
@@ -136,19 +136,26 @@ export default function paint ( { element,layout, theme, selections, constraints
       var options = {
         groups: groups,
         layout: {
-          randomSeed: 34545 //"0.6610209392878246:1631081903504"
+          hierarchical: {
+            direction: layout.chartDirection,
+            sortMethod: "directed",
+            levelSeparation: 200,
+            nodeSpacing: 200,
+            treeSpacing: 500,
+            parentCentralization: layout.parentCentralization
+          },
         },
         nodes: {
-          shape:layout.nodeShape,
-          shadow:layout.shadowMode
+          shape: layout.nodeShape,
+          shadow: layout.shadowMode
         },
         edges: {
-          shadow:layout.shadowMode,
+          shadow: layout.shadowMode,
           font: {
             align: layout.posEdgeLabel
           },
           smooth: {
-            type: layout.edgeType
+            enabled:false
           }
         },
         interaction: {
@@ -159,17 +166,8 @@ export default function paint ( { element,layout, theme, selections, constraints
           selectConnectedEdges: true
         },
         physics: {
-          forceAtlas2Based: {
-            gravitationalConstant: -100,
-            centralGravity: 0.005,
-            springLength: 230,
-            springConstant: 0.18
-          },
-          maxVelocity: 146,
-          solver: 'forceAtlas2Based',
-          timestep: 0.35,
-          stabilization: { iterations: 150 }
-        }
+          enabled: true,
+        },
       };
       var network = new Network(container, data, options);
       network.fit();
@@ -183,15 +181,15 @@ export default function paint ( { element,layout, theme, selections, constraints
             conNodes.push(nodes);
             var connectedNodes = conNodes.flat();
             const toSelect = [];
-            connectedNodes.forEach(function(node) {
+            connectedNodes.forEach(function (node) {
               var id;
-              data.nodes.forEach(function(dataNode) {
+              data.nodes.forEach(function (dataNode) {
                 // Find match, ignore null
-                if(dataNode.id === node && node !== "-") {
+                if (dataNode.id === node && node !== "-") {
                   id = dataNode.eNum;
                 }
               });
-              if(id !== undefined) {
+              if (id !== undefined) {
                 // Remove duplicates
                 toSelect.indexOf(id) === -1 && toSelect.push(id);
               }
@@ -212,7 +210,7 @@ export default function paint ( { element,layout, theme, selections, constraints
         }
       });
 
-      network.on('stabilizationIterationsDone', function() {
+      network.on('stabilizationIterationsDone', function () {
         network.stopSimulation();
         resolve(network);
       });

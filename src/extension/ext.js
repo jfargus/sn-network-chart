@@ -8,17 +8,17 @@ export default function ext() {
       items: {
         data: {
           uses: "data",
-          items:{
-            dimensions:{
+          items: {
+            dimensions: {
               disabledRef: "",
               items: {
                 helpDesc: {
                   component: 'text',
                   style: 'qlik-network-chart-italic-property',
-                  label: function(properties, handler) {
+                  label: function (properties, handler) {
                     var index;
                     handler.getDimensions().forEach((element, i) => {
-                      if(element.qDef.cId === properties.qDef.cId) {
+                      if (element.qDef.cId === properties.qDef.cId) {
                         index = i;
                       }
                     });
@@ -71,7 +71,34 @@ export default function ext() {
                   ],
                   defaultValue: "dynamic"
                 },
-                displayEdgeLabel : {
+                chartDirection: {
+                  ref: "chartDirection",
+                  type: "string",
+                  component: "dropdown",
+                  label: "Chart Direction",
+                  options: [
+                    { value: 'UD' },
+                    { value: 'DU' },
+                    { value: 'LR' },
+                    { value: 'RL' }
+                  ],
+                  defaultValue: "LR"
+                },
+                parentCentralization: {
+                  ref: "parentCentralization",
+                  type: "boolean",
+                  component: "switch",
+                  label: "Parent Centralization",
+                  options: [{
+                    value: true,
+                    label: "On"
+                  }, {
+                    value: false,
+                    label: "Off"
+                  }],
+                  defaultValue: false
+                },
+                displayEdgeLabel: {
                   ref: "displayEdgeLabel",
                   type: "boolean",
                   component: "switch",
@@ -84,6 +111,25 @@ export default function ext() {
                     label: "Off"
                   }],
                   defaultValue: false
+                },
+                avoidOverlapSetting: {
+                  ref: "avoidOverlapSetting",
+                  type: "string",
+                  component: "dropdown",
+                  label: "Overlap Tolerance",
+                  options: [
+                    { value: '1' },
+                    { value: '2' },
+                    { value: '3' },
+                    { value: '4' },
+                    { value: '5' },
+                    { value: '6' },
+                    { value: '7' },
+                    { value: '8' },
+                    { value: '9' },
+                    { value: '10' }
+                  ],
+                  defaultValue: "1"
                 },
                 posEdgeLabel: {
                   ref: "posEdgeLabel",
@@ -139,7 +185,7 @@ export default function ext() {
             },
             paragraph1: {
               label:
-              `Network chart is Qlik Sense chart which
+                `Network chart is Qlik Sense chart which
               allows you to draw a network of connected
               nodes and edges from a data set to a sheet.`,
               component: 'text'

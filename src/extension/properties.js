@@ -50,6 +50,19 @@ const properties = {
   /**
    * @type {('top'|'middle'|'bottom'|'horizontal')=}
    */
+  chartDirection: "LR",
+  /**
+   * @type {('UD'|'DU'|'LR'|'RL')=}
+   */
+  avoidOverlapSetting: "1",
+  /**
+   * @type {('1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'10')=}
+   */
+
+  parentCentralization: true,
+    /**
+   * @type {boolean=}
+   */
   posEdgeLabel: "top",
   /**
    * @type {('dot'|'square'|'star'|'triangle'|'triangleDown'|'diamond')=}
